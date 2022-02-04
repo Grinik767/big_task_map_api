@@ -31,6 +31,8 @@ class Map:
 
     def map_update(self, event):
         step_spn = list(map(float, self.spn.split(',')))
+        coords = list(map(float, self.coords.split(",")))
+
         if event.key == pygame.K_PAGEUP:
             if step_spn[0] - 0.005 >= 0.002:
                 step_spn[0] -= 0.005
@@ -39,7 +41,19 @@ class Map:
             if step_spn[0] + 0.005 <= 10:
                 step_spn[0] += 0.005
                 step_spn[1] += 0.005
-        self.spn = ','.join(list((map(str, step_spn))))
+
+        if event.key == pygame.K_UP:
+            coords[1] += 2 * step_spn[1]
+        if event.key == pygame.K_DOWN:
+            coords[1] -= 2 * step_spn[1]
+
+        if event.key == pygame.K_RIGHT:
+            coords[0] += 2 * step_spn[0]
+        if event.key == pygame.K_LEFT:
+            coords[0] -= 2 * step_spn[0]
+
+        self.coords = ','.join(list(map(str, coords)))
+        self.spn = ','.join(list(map(str, step_spn)))
         self.map_request()
         self.map_to_img()
 
