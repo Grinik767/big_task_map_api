@@ -29,6 +29,20 @@ class Map:
             with open(self.map_file, "wb") as file:
                 file.write(self.response.content)
 
+    def map_update(self, event):
+        step_spn = list(map(float, self.spn.split(',')))
+        if event.key == pygame.K_PAGEUP:
+            if step_spn[0] - 0.005 >= 0.002:
+                step_spn[0] -= 0.005
+                step_spn[1] -= 0.005
+        if event.key == pygame.K_PAGEDOWN:
+            if step_spn[0] + 0.005 <= 10:
+                step_spn[0] += 0.005
+                step_spn[1] += 0.005
+        self.spn = ','.join(list((map(str, step_spn))))
+        self.map_request()
+        self.map_to_img()
+
 
 if __name__ == '__main__':
     coords = "37.530887,55.703118"
@@ -37,7 +51,15 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode((600, 450))
     screen.blit(pygame.image.load(mp.map_file), (0, 0))
     pygame.display.flip()
-    while pygame.event.wait().type != pygame.QUIT:
-        pass
+    run = True
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.KEYDOWN:
+                mp.map_update(event)
+        screen.blit(pygame.image.load(mp.map_file), (0, 0))
+        pygame.display.flip()
+
     pygame.quit()
     os.remove(mp.map_file)
