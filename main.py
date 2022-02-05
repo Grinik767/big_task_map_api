@@ -1,79 +1,51 @@
 import os
-
 import pygame
-import requests
+import pygame_textinput
 
-
-class Map:
-    def __init__(self, coords):
-        self.coords = coords
-        self.map_type = 'map'
-        self.spn = '0.002,0.002'
-        self.map_file = "map.png"
-        self.response = None
-        self.map_request()
-        self.map_to_img()
-
-    def map_request(self):
-        server = "http://static-maps.yandex.ru/1.x/"
-        params = {
-            "ll": self.coords,
-            "spn": self.spn,
-            "l": self.map_type}
-        response = requests.get(server, params=params)
-        if response:
-            self.response = response
-
-    def map_to_img(self):
-        if self.response:
-            with open(self.map_file, "wb") as file:
-                file.write(self.response.content)
-
-    def map_update(self, event):
-        step_spn = list(map(float, self.spn.split(',')))
-        coords = list(map(float, self.coords.split(",")))
-
-        if event.key == pygame.K_PAGEUP:
-            if step_spn[0] - 0.005 >= 0.002:
-                step_spn[0] -= 0.005
-                step_spn[1] -= 0.005
-        if event.key == pygame.K_PAGEDOWN:
-            if step_spn[0] + 0.005 <= 10:
-                step_spn[0] += 0.005
-                step_spn[1] += 0.005
-
-        if event.key == pygame.K_UP:
-            coords[1] += 2 * step_spn[1]
-        if event.key == pygame.K_DOWN:
-            coords[1] -= 2 * step_spn[1]
-
-        if event.key == pygame.K_RIGHT:
-            coords[0] += 2 * step_spn[0]
-        if event.key == pygame.K_LEFT:
-            coords[0] -= 2 * step_spn[0]
-
-        self.coords = ','.join(list(map(str, coords)))
-        self.spn = ','.join(list(map(str, step_spn)))
-        self.map_request()
-        self.map_to_img()
-
+from map import Map
+from geocoder import Geocoder
 
 if __name__ == '__main__':
     coords = "37.530887,55.703118"
     mp = Map(coords)
+
     pygame.init()
-    screen = pygame.display.set_mode((600, 450))
-    screen.blit(pygame.image.load(mp.map_file), (0, 0))
+    screen = pygame.display.set_mode((600, 550))
+    screen.fill((255, 255, 255))
+    screen.blit(pygame.image.load(mp.map_file), (0, 100))
+    finder = pygame.image.load('data/finder.png')
+    screen.blit(finder, (535, 50))
     pygame.display.flip()
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont("Arial", 18)
+    manager = pygame_textinput.TextInputManager(validator=lambda input: len(input) <= 60)
+    textinput = pygame_textinput.TextInputVisualizer(manager=manager, font_object=font)
+    textinput.cursor_width = 2
+    rect_input = pygame.Rect(10, 50, 520, 42)
+    keys_to_funcs = [pygame.K_PAGEUP, pygame.K_PAGEDOWN, pygame.K_UP, pygame.K_DOWN, pygame.K_RIGHT, pygame.K_LEFT]
     run = True
     while run:
-        for event in pygame.event.get():
+        screen.fill((255, 255, 255))
+        events = pygame.event.get()
+        textinput.update(events)
+        screen.blit(textinput.surface, (13, 56))
+        for event in events:
             if event.type == pygame.QUIT:
                 run = False
-            if event.type == pygame.KEYDOWN:
-                mp.map_update(event)
-        screen.blit(pygame.image.load(mp.map_file), (0, 0))
+            if event.type == pygame.KEYDOWN and event.key in keys_to_funcs:
+                mp.map_update_by_keys(event)
+            if pygame.mouse.get_focused():
+                x, y = pygame.mouse.get_pos()
+                if 535 <= x <= 535 + finder.get_width() and 50 <= y <= 50 + finder.get_height():
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        geo = Geocoder(textinput.value)
+                        coords = geo.get_coords_from_json()
+                        mp.map_update(coords)
+        pygame.draw.rect(screen, (0, 0, 0), rect_input, 1)
+        screen.blit(pygame.image.load(mp.map_file), (0, 100))
+        screen.blit(finder, (535, 50))
         pygame.display.flip()
+        clock.tick(30)
 
     pygame.quit()
     os.remove(mp.map_file)
