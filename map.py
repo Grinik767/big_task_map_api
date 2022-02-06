@@ -61,8 +61,12 @@ class Map:
         self.spn = ','.join(list(map(str, step_spn)))
         self.reload_map()
 
-    def map_update(self, new_coords):
+    def map_add_mark(self, new_coords):
         self.coords = new_coords
         self.need_mark = True
         self.mark_coords = new_coords
+        self.reload_map()
+
+    def map_change_type(self, type):
+        self.map_type = type
         self.reload_map()
