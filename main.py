@@ -12,6 +12,7 @@ if __name__ == '__main__':
     address = ""
 
     pygame.init()
+    pygame.display.set_caption("Big task map API 1.0")
     font = pygame.font.SysFont("Arial", 18)
     font_tick = pygame.font.SysFont("Arial", 35, bold=True)
     screen = pygame.display.set_mode((600, 600))
@@ -39,6 +40,7 @@ if __name__ == '__main__':
     postal = "Прописывать индекс в адресе"
     text_postal = font.render(postal, True, (0, 0, 0))
     rect_tick = pygame.Rect(195, 5, 30, 30)
+    now_text = ""
 
     keys_to_funcs = [pygame.K_PAGEUP, pygame.K_PAGEDOWN, pygame.K_UP, pygame.K_DOWN, pygame.K_RIGHT, pygame.K_LEFT]
     run = True
@@ -56,6 +58,7 @@ if __name__ == '__main__':
                 x, y = pygame.mouse.get_pos()
                 if check_button(x, y, 535, 50, finder.get_width(), finder.get_height(), event) and textinput.value:
                     geo = Geocoder(textinput.value)
+                    now_text = textinput.value
                     coords = geo.get_coords_from_json()
                     address = geo.get_address_from_json()
                     if tick_c:
@@ -71,12 +74,20 @@ if __name__ == '__main__':
                     textinput.value = ""
                     mp.clear_map()
                     address = ""
+                    now_text = ""
                 if check_button(x, y, 195, 5, rect_tick.width, rect_tick.height, event):
                     if tick_c:
                         tick = ""
                     else:
                         tick = "+"
                     tick_c = not tick_c
+                    if now_text:
+                        geo = Geocoder(now_text)
+                        coords = geo.get_coords_from_json()
+                        address = geo.get_address_from_json()
+                        if tick_c:
+                            address += f"; Индекс: {geo.get_postal_code_from_json()}"
+                        mp.map_add_mark(coords)
         pygame.draw.rect(screen, (0, 0, 0), rect_input, 1)
         screen.blit(pygame.image.load(mp.map_file), (0, 150))
         screen.blit(finder, (535, 50))
