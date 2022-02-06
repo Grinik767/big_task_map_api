@@ -9,16 +9,18 @@ class Map:
         self.spn = '0.002,0.002'
         self.map_file = "map.png"
         self.response = None
+        self.need_mark = False
+        self.mark_coords = ""
         self.reload_map()
 
-    def map_request(self, need_mark=False):
+    def map_request(self):
         server = "http://static-maps.yandex.ru/1.x/"
         params = {
             "ll": self.coords,
             "spn": self.spn,
             "l": self.map_type}
-        if need_mark:
-            params["pt"] = f"{self.coords},pm2dbl"
+        if self.need_mark:
+            params["pt"] = f"{self.mark_coords},pm2dbl"
         response = requests.get(server, params=params)
         if response:
             self.response = response
@@ -28,8 +30,8 @@ class Map:
             with open(self.map_file, "wb") as file:
                 file.write(self.response.content)
 
-    def reload_map(self, need_mark=False):
-        self.map_request(need_mark)
+    def reload_map(self):
+        self.map_request()
         self.map_to_img()
 
     def map_update_by_keys(self, event):
@@ -61,4 +63,6 @@ class Map:
 
     def map_update(self, new_coords):
         self.coords = new_coords
-        self.reload_map(need_mark=True)
+        self.need_mark = True
+        self.mark_coords = new_coords
+        self.reload_map()
