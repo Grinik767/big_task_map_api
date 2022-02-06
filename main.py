@@ -9,11 +9,13 @@ from funcs import check_button, coords_start
 if __name__ == '__main__':
     coords = coords_start
     mp = Map(coords)
+    address = ""
 
     pygame.init()
-    screen = pygame.display.set_mode((600, 550))
+    font = pygame.font.SysFont("Arial", 18)
+    screen = pygame.display.set_mode((600, 600))
     screen.fill((255, 255, 255))
-    screen.blit(pygame.image.load(mp.map_file), (0, 100))
+    screen.blit(pygame.image.load(mp.map_file), (0, 150))
     finder = pygame.image.load('data/finder.png')
     earth = pygame.image.load('data/earth.png')
     spacecraft = pygame.image.load('data/spacecraft.png')
@@ -23,10 +25,9 @@ if __name__ == '__main__':
     screen.blit(map_img, (10, 5))
     screen.blit(spacecraft, (60, 5))
     screen.blit(earth, (130, 5))
-    screen.blit(reset, (5, 105))
+    screen.blit(reset, (5, 155))
     pygame.display.flip()
     clock = pygame.time.Clock()
-    font = pygame.font.SysFont("Arial", 18)
     manager = pygame_textinput.TextInputManager(validator=lambda input: len(input) <= 60)
     textinput = pygame_textinput.TextInputVisualizer(manager=manager, font_object=font)
     textinput.cursor_width = 2
@@ -48,6 +49,7 @@ if __name__ == '__main__':
                 if check_button(x, y, 535, 50, finder.get_width(), finder.get_height(), event) and textinput.value:
                     geo = Geocoder(textinput.value)
                     coords = geo.get_coords_from_json()
+                    address = geo.get_address_from_json()
                     mp.map_add_mark(coords)
                 if check_button(x, y, 10, 5, map_img.get_width(), map_img.get_height(), event):
                     mp.map_change_type("map")
@@ -55,16 +57,19 @@ if __name__ == '__main__':
                     mp.map_change_type("sat")
                 if check_button(x, y, 130, 5, earth.get_width(), earth.get_height(), event):
                     mp.map_change_type("sat,skl")
-                if check_button(x, y, 5, 105, reset.get_width(), reset.get_height(), event):
+                if check_button(x, y, 5, 155, reset.get_width(), reset.get_height(), event):
                     textinput.value = ""
                     mp.clear_map()
+                    address = ""
         pygame.draw.rect(screen, (0, 0, 0), rect_input, 1)
-        screen.blit(pygame.image.load(mp.map_file), (0, 100))
+        screen.blit(pygame.image.load(mp.map_file), (0, 150))
         screen.blit(finder, (535, 50))
         screen.blit(map_img, (10, 5))
         screen.blit(spacecraft, (60, 5))
         screen.blit(earth, (130, 5))
-        screen.blit(reset, (5, 105))
+        screen.blit(reset, (5, 155))
+        text_address = font.render(address, True, (0, 0, 0))
+        screen.blit(text_address, (5, 105))
         pygame.display.flip()
         clock.tick(30)
 

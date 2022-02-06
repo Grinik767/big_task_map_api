@@ -22,6 +22,12 @@ class Geocoder:
         coords = json_resp["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["Point"]['pos']
         return ','.join(coords.split())
 
+    def get_address_from_json(self):
+        json_resp = self.response.json()
+        address = json_resp["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]['metaDataProperty'][
+            'GeocoderMetaData']['AddressDetails']['Country']['AddressLine']
+        return address
+
 
 if __name__ == '__main__':
     geo = Geocoder("Тюмень, Московский тракт 88")
