@@ -12,7 +12,8 @@ class Geocoder:
         geocoder_params = {
             "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
             "geocode": self.search,
-            "format": "json"}
+            "format": "json",
+            "results": 1}
         response = requests.get(geocoder_api_server, params=geocoder_params)
         if response:
             self.response = response
@@ -27,6 +28,18 @@ class Geocoder:
         address = json_resp["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]['metaDataProperty'][
             'GeocoderMetaData']['AddressDetails']['Country']['AddressLine']
         return address
+
+    def get_postal_code_from_json(self):
+        json_resp = self.response.json()
+        postal_code = ""
+        try:
+            postal_code = json_resp["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]['metaDataProperty'][
+                'GeocoderMetaData']['AddressDetails']['Country']['AdministrativeArea']['SubAdministrativeArea']['Locality'][
+                'Thoroughfare']['Premise']['PostalCode']['PostalCodeNumber']
+        except KeyError:
+            pass
+        return postal_code
+
 
 
 if __name__ == '__main__':
