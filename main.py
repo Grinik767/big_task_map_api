@@ -4,10 +4,10 @@ import pygame_textinput
 
 from map import Map
 from geocoder import Geocoder
-from funcs import check_button
+from funcs import check_button, coords_start
 
 if __name__ == '__main__':
-    coords = "37.530887,55.703118"
+    coords = coords_start
     mp = Map(coords)
 
     pygame.init()
@@ -18,10 +18,12 @@ if __name__ == '__main__':
     earth = pygame.image.load('data/earth.png')
     spacecraft = pygame.image.load('data/spacecraft.png')
     map_img = pygame.image.load('data/map.png')
+    reset = pygame.image.load('data/recet.png')
     screen.blit(finder, (535, 50))
     screen.blit(map_img, (10, 5))
     screen.blit(spacecraft, (60, 5))
     screen.blit(earth, (130, 5))
+    screen.blit(reset, (5, 105))
     pygame.display.flip()
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("Arial", 18)
@@ -43,7 +45,7 @@ if __name__ == '__main__':
                 mp.map_update_by_keys(event)
             if pygame.mouse.get_focused():
                 x, y = pygame.mouse.get_pos()
-                if check_button(x, y, 535, 50, finder.get_width(), finder.get_height(), event):
+                if check_button(x, y, 535, 50, finder.get_width(), finder.get_height(), event) and textinput.value:
                     geo = Geocoder(textinput.value)
                     coords = geo.get_coords_from_json()
                     mp.map_add_mark(coords)
@@ -53,12 +55,16 @@ if __name__ == '__main__':
                     mp.map_change_type("sat")
                 if check_button(x, y, 130, 5, earth.get_width(), earth.get_height(), event):
                     mp.map_change_type("sat,skl")
+                if check_button(x, y, 5, 105, reset.get_width(), reset.get_height(), event):
+                    textinput.value = ""
+                    mp.clear_map()
         pygame.draw.rect(screen, (0, 0, 0), rect_input, 1)
         screen.blit(pygame.image.load(mp.map_file), (0, 100))
         screen.blit(finder, (535, 50))
         screen.blit(map_img, (10, 5))
         screen.blit(spacecraft, (60, 5))
         screen.blit(earth, (130, 5))
+        screen.blit(reset, (5, 105))
         pygame.display.flip()
         clock.tick(30)
 

@@ -1,5 +1,6 @@
 import pygame
 import requests
+from funcs import coords_start
 
 
 class Map:
@@ -69,4 +70,13 @@ class Map:
 
     def map_change_type(self, type):
         self.map_type = type
+        self.reload_map()
+
+    def clear_map(self):
+        self.coords = coords_start
+        self.map_type = 'map'
+        self.spn = '0.002,0.002'
+        self.need_mark = False
+        self.response = None
+        self.mark_coords = ""
         self.reload_map()
